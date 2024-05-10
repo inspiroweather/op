@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather App</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"
+  />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      border: 0;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #06283d;
+    }
+
+    .container {
+      position: relative;
+      width: 500px;
+      height: auto;
+      background-color: #fff;
+      padding: 28px 32px;
+      overflow: hidden;
+      border-radius: 18px;
+      font-family: "Lato", sans-serif;
+      transition: 0.6s ease-out;
+    }
+
+    .search-box {
+      width: 100%;
+      height: min-content;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .search-box input {
+      color: #06283d;
+      width: 80%;
+      font-size: 24px;
+      font-weight: 500;
+      text-transform: uppercase;
+      padding-left: 32px;
+    }
+
+    .search-box input::placeholder {
+      font-size: 20px;
+      font-weight: 500;
+      color: #06283d;
+      text-transform: capitalize;
+    }
+
+    .search-box button {
+      cursor: pointer;
+      width: 50px;
+      height: 50px;
+      color: #06283d;
+      background-color: #dff6ff;
+      border-radius: 50%;
+      font-size: 22px;
+      transition: 0.4s ease;
+    }
+
+    .search-box button:hover {
+      color: #fff;
+      background-color: #06283d;
+    }
+
+    .fa-location-dot {
+      position: absolute;
+      color: #06283d;
+      font-size: 28px;
+    }
+
+    .weather {
+      margin-top: 30px;
+      text-align: center;
+      display: none;
+    }
+
+    .weather h1 {
+      font-size: 80px;
+      font-weight: 700;
+    }
+
+    .weather h2 {
+      font-size: 55px;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+
+    .details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 50px 0;
+      padding: 0 20px;
+    }
+
+    .details i {
+      font-size: 80px;
+    }
+
+    .details p {
+      font-size: 28px;
+    }
+
+    .weather-image i {
+      font-size: 120px;
+    }
+
+    .error {
+      text-align: left;
+      font-size: 30px;
+      margin-top: 20px;
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="search-box">
+      <i class="fa-solid fa-location-dot"></i>
+      <input type="text" placeholder="Enter your location" />
+      <button class="fa-solid fa-magnifying-glass"></button>
+    </div>
+    <div class="error">
+      <p>Invalid city name</p>
+    </div>
+    <div class="weather">
+      <div class="weather-image">
+        <i class="fa-solid fa-cloud"></i>
+      </div>
+      <h1 class="temp">22 &#8451</h1>
+      <h2 class="city">New York</h2>
+      <div class="details">
+        <div class="col">
+          <i class="fa-solid fa-water"></i>
+          <div>
+            <p class="humidity">50%</p>
+            <p>Humidity</p>
+          </div>
+        </div>
+        <div class="col">
+          <i class="fa-solid fa-wind"></i>
+          <div>
+            <p class="wind">15 km/h</p>
+            <p>Wind Speed</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const apiKey = "768e0288406389e6e0f9840659813b24";
+
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=`;
+
+    const searchInput = document.querySelector(".search-box input");
+
+    const searchButton = document.querySelector(".search-box button");
+
+    const weatherIcon = document.querySelector(".weather-image i");
+
+    const weather = document.querySelector(".weather");
+
+    const errorText = document.querySelector(".error");
+
+    async function checkWeather(city) {
+      const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+
+      if (response.status === 404) {
+        errorText.style.display = "block";
+        weather.style.display = "none";
+      } else {
+        const data = await response.json();
+        console.log(data);
+
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML =
+          Math.round(data.main.temp) + "&#8451";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+        document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+        if (data.weather[0].main == "Clear") {
+          weatherIcon.className = "fa-solid fa-sun";
+        } else if (data.weather[0].main == "Rain") {
+          weatherIcon.className = "fa-solid fa-cloud-rain";
+        } else if (data.weather[0].main == "Mist") {
+          weatherIcon.className = "fa-solid fa-cloud-mist";
+        } else if (data.weather[0].main == "Drizzle") {
+          weatherIcon.className = "fa-solid fa-cloud-drizzle";
+        }
+
+        weather.style.display = "block";
+        errorText.style.display = "none";
+      }
+    }
+
+    searchButton.addEventListener("click", () => {
+      checkWeather(searchInput.value);
+      searchInput.value = "";
+    });
+
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.keyCode === 13) {
+        checkWeather(searchInput.value);
+        searchInput.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
